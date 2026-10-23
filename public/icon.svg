@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3987e5"/>
+      <stop offset="1" stop-color="#1c5cab"/>
+    </linearGradient>
+  </defs>
+  <rect x="50" y="50" width="412" height="412" rx="92" fill="url(#bg)"/>
+  <!-- four agent terminals; the active one shows a prompt -->
+  <rect x="118" y="118" width="124" height="124" rx="22" fill="#ffffff"/>
+  <rect x="270" y="118" width="124" height="124" rx="22" fill="#ffffff" fill-opacity="0.5"/>
+  <rect x="118" y="270" width="124" height="124" rx="22" fill="#ffffff" fill-opacity="0.5"/>
+  <rect x="270" y="270" width="124" height="124" rx="22" fill="#ffffff" fill-opacity="0.5"/>
+  <path d="M150 152 L180 180 L150 208" fill="none" stroke="#1c5cab" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="190" y="196" width="32" height="12" rx="6" fill="#1c5cab"/>
+  <!-- an agent that needs you -->
+  <circle cx="390" cy="122" r="32" fill="#fab219" stroke="#3080e0" stroke-width="10"/>
+</svg>

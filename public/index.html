@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentsHub</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="/vendor/xterm.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>AgentsHub</h1>
+  <div id="summary" class="summary"></div>
+  <span id="status" class="status">Loading…</span>
+  <button id="view-toggle" type="button" hidden></button>
+  <button id="new-group" type="button">New group</button>
+</header>
+<div class="layout">
+  <main id="board">
+    <section>
+      <h2 class="section-title">Needs you</h2>
+      <div id="inbox" class="inbox"></div>
+    </section>
+    <section>
+      <h2 class="section-title">Projects <span class="hint">drag agents between groups</span></h2>
+      <div id="groups" class="groups"></div>
+    </section>
+  </main>
+  <section id="tiles" class="tiles" aria-label="Terminals" data-count="0"></section>
+</div>
+<aside id="drawer" class="drawer" hidden></aside>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
