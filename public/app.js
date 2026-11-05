@@ -385,6 +385,59 @@ function openDrawer(sessionId) {
   render();
 }
 
+// ---- sidebar width (workspace) ----
+
+const SIDEBAR_KEY = 'agent-dashboard:sidebar-width';
+const SIDEBAR_MIN = 260;
+const resizer = $('#sidebar-resizer');
+
+function setSidebarWidth(px) {
+  const width = Math.round(Math.min(window.innerWidth * 0.7, Math.max(SIDEBAR_MIN, px)));
+  document.body.style.setProperty('--sidebar-width', `${width}px`);
+  resizer.setAttribute('aria-valuenow', width);
+  return width;
+}
+
+function saveSidebarWidth(width) {
+  try {
+    if (width) localStorage.setItem(SIDEBAR_KEY, width);
+    else localStorage.removeItem(SIDEBAR_KEY);
+  } catch {
+    // storage unavailable: the width just isn't remembered
+  }
+}
+
+try {
+  const saved = Number(localStorage.getItem(SIDEBAR_KEY));
+  if (saved) setSidebarWidth(saved);
+} catch {
+  // storage unavailable: keep the default width
+}
+
+resizer.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  resizer.setPointerCapture(e.pointerId);
+  document.body.classList.add('resizing');
+});
+resizer.addEventListener('pointermove', (e) => {
+  if (resizer.hasPointerCapture(e.pointerId)) setSidebarWidth(e.clientX - $('.layout').getBoundingClientRect().left);
+});
+resizer.addEventListener('lostpointercapture', () => {
+  document.body.classList.remove('resizing');
+  saveSidebarWidth(Math.round($('#board').getBoundingClientRect().width));
+});
+resizer.addEventListener('dblclick', () => {
+  document.body.style.removeProperty('--sidebar-width');
+  saveSidebarWidth(null);
+});
+resizer.addEventListener('keydown', (e) => {
+  const step = { ArrowLeft: -24, ArrowRight: 24 }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  saveSidebarWidth(setSidebarWidth($('#board').getBoundingClientRect().width + step));
+});
+
 // ---- events ----
 
 document.addEventListener('click', (e) => {
