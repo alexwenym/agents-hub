@@ -25,6 +25,18 @@ export function configure(terminalTheme, changed) {
 
 export const openIds = () => [...tiles.keys()];
 export const has = (id) => tiles.has(id);
+// Plain shell tiles are keyed 'shell:<id>'; agent tiles by the background session's short id.
+export const isShell = (id) => id.startsWith('shell:');
+export const title = (id) => tiles.get(id)?.title ?? null;
+export const isConnected = (id) => tiles.get(id)?.ws?.readyState === WebSocket.OPEN;
+
+// Start a plain login shell on the server; returns its tile id (not yet open).
+export async function newShell() {
+  const res = await fetch('/api/shells', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error ?? String(res.status));
+  return `shell:${body.id}`;
+}
 
 // Ids open when the page was last closed, so a reload brings the terminals back.
 export function saved() {
@@ -60,6 +72,14 @@ export function close(id) {
   tile.el.remove();
   tiles.delete(id);
   changed();
+  if (isShell(id)) {
+    // closing a shell tile ends the shell, like closing a terminal window
+    fetch('/api/shells/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id.slice('shell:'.length) }),
+    }).catch(() => {});
+  }
 }
 
 export function reconnect(id) {
@@ -104,8 +124,11 @@ function create(id) {
   const fit = new FitAddon();
   term.loadAddon(fit);
   term.open(el.querySelector('.term'));
-  const tile = { id, el, term, fit, ws: null, usedAt: Date.now() };
+  const tile = { id, el, term, fit, ws: null, usedAt: Date.now(), title: null };
   term.onData((d) => send(tile, { t: 'i', d }));
+  term.onTitleChange((t) => {
+    tile.title = t; // shells set this to the cwd or running command
+  });
   term.onResize(({ cols, rows }) => send(tile, { t: 'r', c: cols, r: rows }));
   el.addEventListener('focusin', () => {
     tile.usedAt = Date.now();
@@ -129,7 +152,8 @@ function connect(tile) {
   tile.term.reset();
   overlay(tile, null);
   const { cols, rows } = tile.term;
-  const ws = new WebSocket(`ws://${location.host}/term/${tile.id}?cols=${cols}&rows=${rows}`);
+  const path = isShell(tile.id) ? `shell/${tile.id.slice('shell:'.length)}` : `term/${tile.id}`;
+  const ws = new WebSocket(`ws://${location.host}/${path}?cols=${cols}&rows=${rows}`);
   tile.ws = ws;
   // the tile may have been resized while connecting
   ws.onopen = () => send(tile, { t: 'r', c: tile.term.cols, r: tile.term.rows });
@@ -137,16 +161,21 @@ function connect(tile) {
   ws.onclose = (e) => {
     if (tile.ws !== ws) return; // closed on purpose or replaced by a reconnect
     tile.ws = null;
-    overlay(tile, e.code === 4000 ? 'Detached from this session.' : "Couldn't connect to this session.");
+    overlay(tile, e.code);
   };
 }
 
-function overlay(tile, message) {
+// `code` is the socket's close code, or null to hide the overlay.
+function overlay(tile, code) {
   const el = tile.el.querySelector('.tile-overlay');
-  el.hidden = !message;
-  if (message) {
-    el.innerHTML = `<p>${message} The agent itself keeps running.</p>`
-      + `<div><button type="button" data-reconnect="${tile.id}">Reconnect</button> `
-      + `<button type="button" data-close-tile="${tile.id}">Close</button></div>`;
-  }
+  el.hidden = code === null;
+  if (code === null) return;
+  const shellExited = isShell(tile.id) && code === 4000;
+  const message = isShell(tile.id)
+    ? ({ 4000: 'The shell has exited.', 4001: 'This terminal was opened in another window.' }[code]
+      ?? "Couldn't connect to this terminal.")
+    : `${code === 4000 ? 'Detached from this session.' : "Couldn't connect to this session."} The agent itself keeps running.`;
+  el.innerHTML = `<p>${message}</p><div>`
+    + (shellExited ? '' : `<button type="button" data-reconnect="${tile.id}">Reconnect</button> `)
+    + `<button type="button" data-close-tile="${tile.id}">Close</button></div>`;
 }

@@ -20,7 +20,9 @@ and Claude Code behavior, and which phase is in progress.
 - `lib/agents.js`: wraps `claude agents --json --all`. `claudeEnv()` is the clean
   environment every child `claude` process must use.
 - `lib/terminals.js`: WebSocket ↔ `claude attach <id>` in a node-pty, one client per
-  socket.
+  socket, plus the sockets for plain shells.
+- `lib/shells.js`: plain login shells for "New terminal" tiles. They outlive their
+  socket, replay recent output on reconnect, and end on ✕, `exit` or a day idle.
 - `lib/transcripts.js`: the only code that reads Claude Code's undocumented
   transcript format. It parses incrementally by byte offset.
 - `lib/jobs.js`: reads `needs` (what a blocked background session is asking) from
@@ -47,5 +49,6 @@ and Claude Code behavior, and which phase is in progress.
   (names, hostnames, real session names, home paths) out of tracked files, code
   comments, test fixtures and commit messages.
 - Keep the localhost protections in `server.js` (Host check, JSON-only writes,
-  Origin check on WebSockets).
+  Origin check on WebSockets). With plain shells they are all that stops another
+  website from running commands here.
 - At each milestone, add a line to PLAN.md's status log and commit.

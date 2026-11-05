@@ -3,6 +3,7 @@ import http from 'node:http';
 import { claudeTheme, listAgents } from './lib/agents.js';
 import { followAgents, loadBoard, saveBoard, validGroups } from './lib/board.js';
 import { jobNeeds } from './lib/jobs.js';
+import { closeShell, createShell, shellIds } from './lib/shells.js';
 import { serveTerminals } from './lib/terminals.js';
 import { forget, summarize } from './lib/transcripts.js';
 
@@ -43,7 +44,7 @@ async function buildState() {
       transcript: await summarize(a.sessionId, a.cwd),
     })),
   );
-  return { generatedAt: new Date().toISOString(), agents: rows, board, terminalTheme };
+  return { generatedAt: new Date().toISOString(), agents: rows, board, terminalTheme, shells: shellIds() };
 }
 
 function reply(res, code, body, type = 'application/json; charset=utf-8') {
@@ -83,6 +84,15 @@ const server = http.createServer(async (req, res) => {
       if (!validGroups(groups)) return reply(res, 400, { error: 'invalid groups' });
       board.groups = groups;
       saveBoard(board);
+      return reply(res, 204);
+    }
+    if (req.method === 'POST' && pathname === '/api/shells') {
+      const id = createShell();
+      return id ? reply(res, 201, { id }) : reply(res, 429, { error: 'too many terminals open' });
+    }
+    if (req.method === 'POST' && pathname === '/api/shells/close') {
+      const { id } = await readJSON(req);
+      closeShell(String(id));
       return reply(res, 204);
     }
     if (req.method === 'POST' && pathname === '/api/dismiss') {

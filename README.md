@@ -20,6 +20,7 @@ Then open http://127.0.0.1:7420 in Chrome and choose ⋮ → **Cast, save, and s
 
 - Every running Claude Code session appears, with its status, last message, wait time and context use.
 - To type into a session from AgentsHub, run `/bg` in its terminal (it keeps working), then click it here.
+- **New terminal** opens a plain shell next to your agents. It survives a page reload, and ✕ closes it.
 - Closing a terminal tile only detaches it. AgentsHub never stops or messages an agent on its own.
 
 ## Manage

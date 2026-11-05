@@ -275,7 +275,7 @@ body.workspace .tiles { display: grid; gap: 8px; padding: 8px; min-height: 0; gr
 .tile.dark { background: #1a1a19; }
 .tile.focused { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .tile-head { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 5px 6px 5px 12px; background: var(--surface); border-bottom: 1px solid var(--hair); font-size: 13px; }
-.tile-head .meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.tile-head .meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 12px; white-space: nowrap; }
 .tile-head .actions { margin-left: auto; display: flex; }
 .term { flex: 1; min-height: 0; padding: 6px 2px 2px 8px; }
 .term .xterm { height: 100%; }

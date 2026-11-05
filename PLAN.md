@@ -25,7 +25,8 @@ projects) instead of switching between terminal windows.
 - **Local only.** Bind 127.0.0.1, reject foreign `Host` headers (DNS rebinding),
   require `Content-Type: application/json` on writes (blocks cross-site form posts),
   and require this page's `Origin` on terminal WebSockets. WebSockets skip CORS, and
-  a terminal can type into an agent.
+  a terminal can type into an agent or, since plain terminals, start a shell. These
+  checks are what keep other websites from running commands on this Mac.
 - **Undocumented formats stay contained.** Only `lib/transcripts.js` (transcripts)
   and `lib/jobs.js` (background job records) read Claude Code's internal files.
   Prefer `claude agents --json` wherever it has the answer; the docs call it the
@@ -122,6 +123,14 @@ longer live, matched by pid first, then by name.
    - A web manifest and icons make it installable as a Chrome app (its own window,
      Dock icon and Cmd+Tab entry). Chrome reported no installability errors.
    - Dock badge = number of agents that need you (`navigator.setAppBadge`).
+2c. **Plain terminals** ✓ done 2026-11-05
+   - "New terminal" opens the user's login shell (`zsh -l`, home directory) as a tile
+     (`lib/shells.js`; `POST /api/shells`, socket `/shell/<uuid>`; tile id
+     `shell:<uuid>`).
+   - Unlike an attach client, the shell is the terminal, so it outlives its socket.
+     A reload reconnects and replays the last ~200k characters of output. ✕ (after a
+     confirm) or `exit` ends it, and a shell with no window for a day is killed. At
+     most 8 shells; a server restart ends them all.
 3. **Launch and stop** ← next. Start a new background agent into a project
    (`claude --bg -n <name>` in a chosen cwd); stop and remove; desktop notification
    naming the agent that needs you.
@@ -154,3 +163,8 @@ longer live, matched by pid first, then by name.
   the service's environment (throwaway session, removed), and that Chrome's
   installability check is clean. Noted: Claude's background supervisor isn't always
   running; `claude --bg` starts it ("Starting background service…").
+- 2026-11-05: plain terminal tiles. Verified on an isolated dev copy (port 7421,
+  copied board) with a CDP script (20 checks): open, run commands, reload into the
+  same shell (same pid, env kept), ✕ kills the shell process, `exit` handling,
+  access rules (JSON-only create; foreign or missing Origin and unknown ids → 403),
+  the 8-shell cap, and agent tiles unchanged (throwaway session, removed).

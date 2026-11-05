@@ -213,6 +213,11 @@ function rowHTML(a, now) {
 }
 
 function tileHeaderHTML(id, a, now) {
+  if (terminals.isShell(id)) {
+    return `<span class="name">Terminal</span><span class="meta">${esc(terminals.title(id) ?? '')}</span>`
+      + `<span class="actions"><button type="button" class="icon-btn" data-close-tile="${esc(id)}" `
+      + `title="Close terminal (ends the shell)" aria-label="Close terminal">✕</button></span>`;
+  }
   const details = a
     ? `<button type="button" class="icon-btn" data-details="${esc(a.sessionId)}" title="Details" aria-label="Details">ⓘ</button>`
     : '';
@@ -298,10 +303,28 @@ function restoreTerminals() {
     if (!terminals.openIds().length) view = 'overview';
     render();
   });
-  const attachable = new Set(data.agents.filter(canAttach).map((a) => a.id));
-  const ids = terminals.saved().filter((id) => attachable.has(id));
+  const reopenable = new Set([
+    ...data.agents.filter(canAttach).map((a) => a.id),
+    ...(data.shells ?? []).map((id) => `shell:${id}`), // an older server has no shells
+  ]);
+  const ids = terminals.saved().filter((id) => reopenable.has(id));
   for (const id of ids) terminals.open(id);
   if (ids.length) view = 'workspace';
+}
+
+async function openShell() {
+  try {
+    openTerminal(await terminals.newShell());
+  } catch (e) {
+    lastError = `Couldn't open a terminal: ${e.message}`;
+    render();
+  }
+}
+
+// Closing a shell tile ends the shell, so ask first while it is still running.
+function closeTile(id) {
+  if (terminals.isShell(id) && terminals.isConnected(id) && !confirm('Close this terminal? Anything running in it will stop.')) return;
+  terminals.close(id);
 }
 
 function openTerminal(id) {
@@ -445,6 +468,7 @@ document.addEventListener('click', (e) => {
   if (!el || !data) return;
   const d = el.dataset;
   if (el.id === 'new-group') newGroup();
+  else if (el.id === 'new-shell') openShell();
   else if (el.id === 'view-toggle') {
     view = view === 'workspace' ? 'overview' : 'workspace';
     render();
@@ -454,7 +478,7 @@ document.addEventListener('click', (e) => {
   else if ('delete' in d) deleteGroup(d.delete);
   else if ('close' in d) openDrawer(null);
   else if ('terminal' in d) openTerminal(d.terminal);
-  else if ('closeTile' in d) terminals.close(d.closeTile);
+  else if ('closeTile' in d) closeTile(d.closeTile);
   else if ('reconnect' in d) terminals.reconnect(d.reconnect);
   else if ('details' in d) openDrawer(d.details);
   else if ('open' in d) openAgent(d.open);
