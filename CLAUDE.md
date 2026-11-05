@@ -31,6 +31,9 @@ and Claude Code behavior, and which phase is in progress.
   tiles; `manifest.webmanifest` and the icons make it installable as an app
   (regenerate the PNGs from `icon.svg` if the icon changes).
 - `scripts/service.sh`: installs and controls the LaunchAgent.
+- `scripts/floral.mjs`: draws the green floral background and writes it into
+  `public/style.css` between the `floral:start/end` markers. Edit the design there,
+  not the generated CSS.
 
 ## Rules
 
