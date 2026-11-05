@@ -164,6 +164,8 @@ body.drawer-open:not(.workspace) main { margin-right: min(560px, 40vw); }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); }
 .panel.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
 .panel header { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--hair); }
+/* name and counts shrink with an ellipsis so the rename/delete buttons stay inside */
+.panel h3, .panel .counts { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .panel h3 { margin: 0; font-size: 14px; }
 .panel .counts { margin-right: auto; color: var(--muted); font-size: 12px; }
 .icon-btn { border: none; background: none; padding: 2px 6px; color: var(--muted); }
@@ -227,7 +229,8 @@ body.workspace .layout {
 body.workspace main { overflow-y: auto; padding: 0 12px 24px; container-type: inline-size; }
 body.workspace .section-title { margin: 14px 0 8px; }
 body.workspace .hint { display: none; }
-body.workspace .inbox, body.workspace .groups { grid-template-columns: 1fr; gap: 8px; }
+/* minmax(0, …): long agent names get an ellipsis instead of widening the column past the sidebar */
+body.workspace .inbox, body.workspace .groups { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 body.workspace .card .snippet { -webkit-line-clamp: 2; }
 body.workspace .row { grid-template-columns: 18px minmax(0, 1fr) auto; }
 body.workspace .row .chip .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
