@@ -312,7 +312,14 @@ function restoreTerminals() {
   if (ids.length) view = 'workspace';
 }
 
+const FULL = 'Four terminals are open and they are all shells. Close one to open another.';
+
 async function openShell() {
+  if (!terminals.hasRoom()) {
+    lastError = FULL;
+    render();
+    return;
+  }
   try {
     openTerminal(await terminals.newShell());
   } catch (e) {
@@ -328,6 +335,11 @@ function closeTile(id) {
 }
 
 function openTerminal(id) {
+  if (!terminals.has(id) && !terminals.hasRoom()) {
+    lastError = FULL;
+    render();
+    return;
+  }
   view = 'workspace';
   terminals.open(id);
   render();

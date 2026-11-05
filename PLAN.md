@@ -131,6 +131,9 @@ longer live, matched by pid first, then by name.
      A reload reconnects and replays the last ~200k characters of output. ✕ (after a
      confirm) or `exit` ends it, and a shell with no window for a day is killed. At
      most 8 shells; a server restart ends them all.
+   - With 4 tiles open, a new tile replaces the least recently used agent tile.
+     Shell tiles are never replaced; if all 4 are shells, the user is asked to close
+     one first.
 3. **Launch and stop** ← next. Start a new background agent into a project
    (`claude --bg -n <name>` in a chosen cwd); stop and remove; desktop notification
    naming the agent that needs you.

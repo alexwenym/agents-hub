@@ -47,12 +47,16 @@ export function saved() {
   }
 }
 
+// When all tiles are taken, a new one replaces the least recently used agent tile
+// (its agent keeps running). Shell tiles are never replaced: closing one ends the shell.
+const replaceable = () => [...tiles.values()].filter((t) => !isShell(t.id)).sort((a, b) => a.usedAt - b.usedAt)[0];
+export const hasRoom = () => tiles.size < MAX_TILES || Boolean(replaceable());
+
 export function open(id) {
-  if (!tiles.has(id)) {
-    if (tiles.size >= MAX_TILES) close([...tiles.values()].sort((a, b) => a.usedAt - b.usedAt)[0].id);
-    tiles.set(id, create(id));
-    changed();
-  }
+  if (tiles.has(id) || !hasRoom()) return;
+  if (tiles.size >= MAX_TILES) close(replaceable().id);
+  tiles.set(id, create(id));
+  changed();
 }
 
 export function focus(id) {
