@@ -7,11 +7,11 @@ const POLL_MS = 3000;
 const CONTEXT_WINDOW = 1_000_000; // assumes 1M-token context windows
 
 const ATTENTION = {
-  blocked: { label: 'Blocked', icon: '!', tone: 'critical', rank: 0 },
-  'your-turn': { label: 'Your turn', icon: '↩', tone: 'warning', rank: 1 },
-  working: { label: 'Working', icon: '▸', tone: 'good', rank: 2 },
-  parked: { label: 'Parked', icon: '–', tone: 'neutral', rank: 3 },
-  unknown: { label: 'Unknown', icon: '?', tone: 'neutral', rank: 4 },
+  blocked: { label: 'Blocked', tone: 'critical', rank: 0 },
+  'your-turn': { label: 'Your turn', tone: 'warning', rank: 1 },
+  working: { label: 'Working', tone: 'good', rank: 2 },
+  parked: { label: 'Parked', tone: 'neutral', rank: 3 },
+  unknown: { label: 'Unknown', tone: 'neutral', rank: 4 },
 };
 
 let data = null; // latest /api/state payload
@@ -93,8 +93,8 @@ const fmtTime = (t) => new Date(t).toLocaleString([], { month: 'short', day: 'nu
 const plain = (text) => (text ?? '').replace(/\*\*|`/g, '').replace(/\n\s*\n+/g, '\n').trim();
 
 function chip(att) {
-  const { label, icon, tone } = ATTENTION[att];
-  return `<span class="chip ${tone}" title="${label}"><span class="icon" aria-hidden="true">${icon}</span><span class="label">${label}</span></span>`;
+  const { label, tone } = ATTENTION[att];
+  return `<span class="chip ${tone}" title="${label}"><span class="icon" aria-hidden="true"></span><span class="label">${label}</span></span>`;
 }
 
 function ctxMeter(t) {
