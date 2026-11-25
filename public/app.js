@@ -117,7 +117,10 @@ function setHTML(el, html) {
 
 function render() {
   const tileCount = terminals.openIds().length;
-  document.body.classList.toggle('workspace', view === 'workspace' && tileCount > 0);
+  const workspace = view === 'workspace' && tileCount > 0;
+  // the workspace hides the page scrollbar, so leave the overview's scroll position behind
+  if (workspace && !document.body.classList.contains('workspace')) scrollTo(0, 0);
+  document.body.classList.toggle('workspace', workspace);
   const toggle = $('#view-toggle');
   toggle.hidden = tileCount === 0;
   toggle.textContent = view === 'workspace' ? 'Overview' : `Terminals (${tileCount})`;

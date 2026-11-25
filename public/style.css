@@ -223,7 +223,9 @@ body.workspace .layout {
   display: grid;
   grid-template-columns: min(var(--sidebar-width, 340px), 70vw) 8px minmax(0, 1fr);
 }
-body.workspace main { overflow-y: auto; padding: 0 12px 24px; container-type: inline-size; }
+/* position: relative keeps the hidden row labels (position: absolute) inside the sidebar;
+   anchored to the page they stretch it past the window, and it keeps a stale scroll offset */
+body.workspace main { position: relative; overflow-y: auto; padding: 0 12px 24px; container-type: inline-size; }
 body.workspace .section-title { margin: 14px 0 8px; }
 body.workspace .hint { display: none; }
 /* minmax(0, …): long agent names get an ellipsis instead of widening the column past the sidebar */
